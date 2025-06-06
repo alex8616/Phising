@@ -1,28 +1,33 @@
 FROM php:8.2-apache
 
-# Instala dependencias del sistema
+# Instala extensiones necesarias y otras herramientas
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libzip-dev libpng-dev libonig-dev libxml2-dev \
+    git zip unzip curl libzip-dev libpng-dev libonig-dev libxml2-dev \
     && docker-php-ext-install pdo pdo_mysql zip
 
-# Instala Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Instala Composer globalmente
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copia los archivos del proyecto
-COPY . /var/www/html/
-
-# Cambia el directorio de trabajo
+# Establece directorio de trabajo
 WORKDIR /var/www/html
 
-# Da permisos a Laravel
+# Copia todo el proyecto
+COPY . .
+
+# Ejecuta composer install para instalar dependencias de Laravel
+RUN composer install --no-dev --optimize-autoloader
+
+# Da permisos necesarios
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Habilita mod_rewrite para Apache
+# Habilita mod_rewrite en Apache
 RUN a2enmod rewrite
+
+# Configura el VirtualHost
 COPY ./vhost.conf /etc/apache2/sites-available/000-default.conf
 
-# Expone el puerto 80
+# Expone el puerto
 EXPOSE 80
 
 CMD ["apache2-foreground"]
