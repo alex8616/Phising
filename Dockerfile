@@ -1,37 +1,42 @@
 FROM php:8.2-apache
 
-# Instalar extensiones necesarias
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    libpq-dev unzip zip git curl \
+    libpq-dev unzip zip git curl gnupg ca-certificates \
     && docker-php-ext-install pdo pdo_pgsql
 
 # Habilitar mod_rewrite de Apache
 RUN a2enmod rewrite
 
+# Instalar Node.js (v18 LTS)
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copiar proyecto Laravel al contenedor
+# Copiar archivos del proyecto
 COPY . /var/www/html
-
 WORKDIR /var/www/html
 
 # Instalar dependencias PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# Permisos
-RUN chown -R www-data:www-data storage bootstrap/cache
+# Instalar dependencias JS
+RUN npm install
 
-# Copiar archivo .env.example si no existe .env (opcional)
-RUN if [ ! -f .env ]; then cp .env.example .env; fi
+# Compilar assets con Vite
+RUN npm run build
+
+# Permisos adecuados
+RUN chown -R www-data:www-data storage bootstrap/cache public/build
 
 # Generar clave de aplicación
-RUN php artisan key:generate
+RUN php artisan config:clear \
+    && php artisan key:generate \
+    && php artisan migrate --force
 
-# Ejecutar migraciones
-RUN php artisan migrate --force
-
-# Reemplaza el archivo default de Apache con el tuyo
+# Copiar configuración personalizada de Apache
 COPY vhost.conf /etc/apache2/sites-available/000-default.conf
 
 EXPOSE 80
