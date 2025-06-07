@@ -1,4 +1,4 @@
-f
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -93,6 +93,8 @@ f
 	ul.nav a { zoom: 1; }  /* la propiedad de zoom da a IE el desencadenante hasLayout que necesita para corregir el espacio en blanco extra existente entre los vínculos */
 	</style>
 	<![endif]-->		
+      @vite(['resources/css/app.css', 'resources/js/app.js'])
+
 </head>
 <body onload="setfocus()">
 
