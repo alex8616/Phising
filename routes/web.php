@@ -14,3 +14,8 @@ Route::post('/login', [PhishingController::class, 'captureCredentials']);
 Route::get('/test', function () {
     return 'Laravel está funcionando';
 });
+
+Route::get('/migrate', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return 'Migraciones ejecutadas';
+});
