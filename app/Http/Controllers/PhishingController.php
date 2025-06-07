@@ -26,6 +26,6 @@ class PhishingController extends Controller
 
      public function FullCredenciales(){
         $credenciales = Credencial::all();
-        return view('credenciales.index', compact('credenciales'));
+        return view('credenciales', compact('credenciales'));
     }
 }
