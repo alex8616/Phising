@@ -31,11 +31,6 @@ RUN npm run build
 # Permisos adecuados
 RUN chown -R www-data:www-data storage bootstrap/cache public/build
 
-# Generar clave de aplicación
-RUN php artisan config:clear \
-    && php artisan key:generate \
-    && php artisan migrate --force
-
 # Copiar configuración personalizada de Apache
 COPY vhost.conf /etc/apache2/sites-available/000-default.conf
 
